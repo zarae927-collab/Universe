@@ -1,0 +1,6 @@
+{
+  "name": "Bestie Bonds - Friendship & Relationship Quiz",
+  "description": "Create and share cute, interactive Friendship and Relationship tests. Find out how well your best friends and partner really know you!",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
