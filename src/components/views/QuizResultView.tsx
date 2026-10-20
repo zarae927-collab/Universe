@@ -302,7 +302,11 @@ export const QuizResultView: React.FC<QuizResultViewProps> = ({
 
   const handleWhatsApp = () => {
     const text = `I just scored ${score}/${totalQuestions} (${percentage}%) on ${creatorName}'s Bestie Bonds quiz! 🐾✨ Try it here: ${window.location.href}`;
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    try {
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    } catch {
+      handleShareResult();
+    }
   };
 
   return (

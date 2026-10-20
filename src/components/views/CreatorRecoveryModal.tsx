@@ -132,7 +132,7 @@ export const CreatorRecoveryModal: React.FC<CreatorRecoveryModalProps> = ({
       await publishCreatorQuiz(quizId);
       await loadCreatorQuizzes();
     } catch (err: any) {
-      alert(err.message || 'Failed to publish draft');
+      setRecoveryError(err.message || 'Failed to publish draft');
     }
   };
 

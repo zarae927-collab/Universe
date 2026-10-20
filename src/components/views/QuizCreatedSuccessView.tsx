@@ -89,7 +89,11 @@ export const QuizCreatedSuccessView: React.FC<QuizCreatedSuccessViewProps> = ({
 
   const handleWhatsAppShare = () => {
     const encoded = encodeURIComponent(shareText);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+    try {
+      window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+    } catch {
+      handleCopy();
+    }
   };
 
   const handleNativeShare = async () => {

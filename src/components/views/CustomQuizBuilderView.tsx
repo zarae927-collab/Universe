@@ -352,7 +352,7 @@ export const CustomQuizBuilderView: React.FC<CustomQuizBuilderViewProps> = ({
   // Request Question Deletion (with safety check)
   const handleRequestDelete = (q: QuizQuestion) => {
     if (questions.length <= 1) {
-      alert("A quiz must have at least one question!");
+      setErrors(["A quiz must have at least one question!"]);
       return;
     }
     setQuestionToDelete({ id: q.id, question: q.question });
@@ -444,7 +444,7 @@ export const CustomQuizBuilderView: React.FC<CustomQuizBuilderViewProps> = ({
       prev.map((q) => {
         if (q.id !== qId) return q;
         if (q.options.length <= 2) {
-          alert('Every question must have at least 2 answer choices.');
+          setErrors(['Every question must have at least 2 answer choices.']);
           return q;
         }
 

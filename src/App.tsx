@@ -153,7 +153,7 @@ export default function App() {
 
       setStep('created-success');
     } catch (err: any) {
-      alert('Could not save quiz. Please try again.');
+      setErrorMessage(err.message || 'Could not save quiz. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -191,7 +191,7 @@ export default function App() {
 
       setStep('created-success');
     } catch (err: any) {
-      alert('Could not save draft. Please try again.');
+      setErrorMessage(err.message || 'Could not save draft. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -258,7 +258,7 @@ export default function App() {
 
       setStep('created-success');
     } catch (err: any) {
-      alert('Could not publish quiz: ' + (err.message || 'Please try again.'));
+      setErrorMessage('Could not publish quiz: ' + (err.message || 'Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -408,7 +408,7 @@ export default function App() {
       setSubmissionResult(resultData);
       setStep('result');
     } catch (err: any) {
-      alert('Failed to submit answers. Please check your connection.');
+      setErrorMessage(err.message || 'Failed to submit answers. Please check your connection.');
     } finally {
       setLoading(false);
     }
