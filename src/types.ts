@@ -75,6 +75,8 @@ export interface QuizSubmission {
   sharedInterestsCount?: number;
 }
 
+export type QuizStatus = 'published' | 'draft';
+
 export interface StoredQuizData {
   id: string;
   category: QuizCategory;
@@ -87,6 +89,32 @@ export interface StoredQuizData {
   createdAt: string;
   totalQuestions: number;
   submissionsCount?: number;
+  status?: QuizStatus;
+  canEdit?: boolean;
+}
+
+export interface CreatorQuizDetails extends StoredQuizData {
+  creatorAnswers: Record<string | number, any>;
+  status: QuizStatus;
+  canEdit: boolean;
+}
+
+export interface CreatorQuizSummary {
+  id: string;
+  category: QuizCategory;
+  title?: string;
+  creatorName: string;
+  status: QuizStatus;
+  createdAt: string;
+  submissionsCount: number;
+  canEdit: boolean;
+}
+
+export interface RecoveryResponse {
+  success: boolean;
+  quizId: string;
+  editToken: string;
+  quiz: StoredQuizData;
 }
 
 export interface QuestionBreakdownItem {

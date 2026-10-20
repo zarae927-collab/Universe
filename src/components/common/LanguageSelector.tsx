@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, ChevronDown, Check, X, Menu, PlusCircle, Trophy, Heart } from 'lucide-react';
+import { Globe, ChevronDown, Check, X, Menu, PlusCircle, Trophy, Heart, Key } from 'lucide-react';
 import { LanguageCode } from '../../types';
 import { LANGUAGE_OPTIONS, TRANSLATIONS } from '../../data/translations';
 import { BrandLogo } from '../mascots/BrandLogo';
@@ -9,6 +9,7 @@ interface HeaderControlsProps {
   onSelectLang: (lang: LanguageCode) => void;
   onCreateNewQuiz: () => void;
   onOpenLeaderboard?: () => void;
+  onOpenCreatorModal?: () => void;
   showLogo?: boolean;
 }
 
@@ -17,6 +18,7 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
   onSelectLang,
   onCreateNewQuiz,
   onOpenLeaderboard,
+  onOpenCreatorModal,
   showLogo = true,
 }) => {
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
@@ -176,6 +178,19 @@ export const HeaderControls: React.FC<HeaderControlsProps> = ({
                   <PlusCircle className="w-4 h-4 text-pink-500" />
                   <span>{t.createMyQuiz}</span>
                 </button>
+
+                {onOpenCreatorModal && (
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      onOpenCreatorModal();
+                    }}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700 text-sm transition-colors cursor-pointer"
+                  >
+                    <Key className="w-4 h-4 text-sky-500" />
+                    <span>My Quizzes & Recovery 🔑</span>
+                  </button>
+                )}
 
                 {onOpenLeaderboard && (
                   <button

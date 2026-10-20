@@ -1,0 +1,308 @@
+{
+  "bb_zxwljogfta": {
+    "id": "bb_zxwljogfta",
+    "category": "friendship",
+    "creatorName": "Sara",
+    "creatorAnswers": {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 0,
+      "5": 1,
+      "6": 2,
+      "7": 0,
+      "8": 1,
+      "9": 2,
+      "10": 0
+    },
+    "questionIds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "createdAt": "2026-10-17T13:51:37.486Z",
+    "submissions": [
+      {
+        "id": "lp0t56y",
+        "participantName": "Alex",
+        "answers": {
+          "1": 0,
+          "2": 1,
+          "3": 2,
+          "4": 0,
+          "5": 1,
+          "6": 2,
+          "7": 0,
+          "8": 1,
+          "9": 0,
+          "10": 1
+        },
+        "score": 8,
+        "totalQuestions": 10,
+        "percentage": 80,
+        "submittedAt": "2026-10-17T13:51:57.423Z"
+      }
+    ]
+  },
+  "bb_oxseq9qknk": {
+    "id": "bb_oxseq9qknk",
+    "category": "friendship",
+    "creatorName": "Zara",
+    "creatorAnswers": {
+      "1": 2,
+      "2": 1,
+      "3": 1,
+      "4": 2,
+      "5": 3,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "questionIds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "createdAt": "2026-10-17T13:59:30.320Z",
+    "submissions": []
+  },
+  "bb_o9qkzb2yly": {
+    "id": "bb_o9qkzb2yly",
+    "category": "child_to_parents",
+    "creatorName": "Mom",
+    "creatorAnswers": {
+      "201": 0,
+      "202": 1,
+      "203": 0,
+      "204": 2,
+      "205": 1,
+      "206": 0,
+      "207": 1,
+      "208": 0,
+      "209": 1,
+      "210": 0
+    },
+    "questionIds": [
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210
+    ],
+    "isTwoWay": false,
+    "createdAt": "2026-10-17T14:37:07.894Z",
+    "submissions": [
+      {
+        "id": "tufxh7o",
+        "participantName": "Leo",
+        "answers": {
+          "201": 0,
+          "202": 1,
+          "203": 0,
+          "204": 2,
+          "205": 1,
+          "206": 0,
+          "207": 1,
+          "208": 0,
+          "209": 1,
+          "210": 0
+        },
+        "score": 10,
+        "totalQuestions": 10,
+        "percentage": 100,
+        "sharedInterestsCount": 10,
+        "submittedAt": "2026-10-17T14:37:39.301Z"
+      }
+    ]
+  },
+  "bb_f6p02jqn2v": {
+    "id": "bb_f6p02jqn2v",
+    "category": "friendship",
+    "creatorName": "Alice",
+    "creatorAnswers": {
+      "1": 1,
+      "2": 2,
+      "3": 3
+    },
+    "questionIds": [
+      1,
+      2,
+      3
+    ],
+    "isTwoWay": false,
+    "createdAt": "2026-10-17T14:55:32.695Z",
+    "submissions": [
+      {
+        "id": "0bvb3s66",
+        "participantName": "Bob",
+        "answers": {
+          "1": 1,
+          "2": 2,
+          "3": 4
+        },
+        "score": 2,
+        "totalQuestions": 3,
+        "percentage": 67,
+        "sharedInterestsCount": 2,
+        "submittedAt": "2026-10-17T14:55:42.068Z",
+        "avatarType": "bunny",
+        "sticker": "bear"
+      }
+    ]
+  },
+  "bb_a7gbw5vlzj": {
+    "id": "bb_a7gbw5vlzj",
+    "category": "friendship",
+    "creatorName": "Maya",
+    "creatorAnswers": {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 0,
+      "5": 1
+    },
+    "questionIds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "isTwoWay": false,
+    "createdAt": "2026-10-17T15:27:24.175Z",
+    "submissions": [
+      {
+        "id": "4zbbvkkf",
+        "participantName": "Chloe",
+        "answers": {
+          "1": 0,
+          "2": 1,
+          "3": 2,
+          "4": 0,
+          "5": 1
+        },
+        "score": 5,
+        "totalQuestions": 5,
+        "percentage": 100,
+        "sharedInterestsCount": 5,
+        "submittedAt": "2026-10-17T15:27:31.976Z",
+        "avatarType": "bunny",
+        "sticker": "bear"
+      }
+    ]
+  },
+  "bb_hm7ql2u7o1": {
+    "id": "bb_hm7ql2u7o1",
+    "category": "friendship",
+    "creatorName": "Alex",
+    "creatorAnswers": {
+      "101": 0,
+      "102": 1,
+      "103": 2
+    },
+    "questionIds": [
+      101,
+      102,
+      103
+    ],
+    "isTwoWay": false,
+    "createdAt": "2026-10-18T15:41:58.993Z",
+    "submissions": [
+      {
+        "id": "att_test_1",
+        "participantName": "Sam",
+        "answers": {
+          "101": 0,
+          "102": 1,
+          "103": 0
+        },
+        "score": 2,
+        "totalQuestions": 3,
+        "percentage": 67,
+        "sharedInterestsCount": 2,
+        "submittedAt": "2026-10-18T15:42:05.203Z",
+        "avatarType": "bunny",
+        "sticker": "bear"
+      }
+    ]
+  },
+  "bb_u8z4gn9v7g": {
+    "id": "bb_u8z4gn9v7g",
+    "category": "friendship",
+    "title": "Taylor Updated Title",
+    "creatorName": "Taylor",
+    "creatorAnswers": {
+      "1": 0,
+      "2": 1
+    },
+    "questionIds": [
+      1,
+      2
+    ],
+    "isTwoWay": false,
+    "status": "published",
+    "editTokenHash": "24375c3791049e889a699c4547800c25509b00cc539f0b04398e793d88d01f58",
+    "recoveryCodeHash": "e50201cbfa88a426900445c297697856d09458f7d5aeceaa8df1e3eaee338050",
+    "recoveryAttempts": 0,
+    "createdAt": "2026-10-18T16:22:08.956Z",
+    "submissions": [
+      {
+        "id": "d1kd48bw",
+        "participantName": "Sammy",
+        "answers": {
+          "1": 0,
+          "2": 1
+        },
+        "score": 2,
+        "totalQuestions": 2,
+        "percentage": 100,
+        "sharedInterestsCount": 2,
+        "submittedAt": "2026-10-18T16:23:30.489Z",
+        "avatarType": "bunny",
+        "sticker": "bear"
+      }
+    ],
+    "updatedAt": "2026-10-18T16:23:43.397Z"
+  },
+  "bb_7yn3lza80g": {
+    "id": "bb_7yn3lza80g",
+    "category": "relationship",
+    "creatorName": "Jordan",
+    "creatorAnswers": {
+      "101": 2
+    },
+    "questionIds": [
+      101
+    ],
+    "isTwoWay": false,
+    "status": "published",
+    "editTokenHash": "73f33585ade8e3093b6a8732cf899bfb1cfe0c70b2b15bc47f8f78abc71d4cae",
+    "recoveryCodeHash": "86cab8d8e3c90d9bfd39901b7172f1fe479929bff8548cbf7610792bfbaba175",
+    "recoveryAttempts": 1,
+    "createdAt": "2026-10-18T16:22:25.552Z",
+    "submissions": [],
+    "updatedAt": "2026-10-18T16:23:07.235Z",
+    "lastRecoveryAttemptAt": "2026-10-18T16:23:20.891Z"
+  }
+}

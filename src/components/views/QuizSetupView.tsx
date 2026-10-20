@@ -16,6 +16,7 @@ interface QuizSetupViewProps {
   creatorName?: string;
   onBack: () => void;
   onContinue: (name: string, isTwoWay?: boolean) => void;
+  onCustomize?: (name: string, isTwoWay?: boolean) => void;
 }
 
 export const QuizSetupView: React.FC<QuizSetupViewProps> = ({
@@ -26,6 +27,7 @@ export const QuizSetupView: React.FC<QuizSetupViewProps> = ({
   creatorName = '',
   onBack,
   onContinue,
+  onCustomize,
 }) => {
   const t = TRANSLATIONS[currentLang];
   const [name, setName] = useState(initialName);
@@ -204,6 +206,23 @@ export const QuizSetupView: React.FC<QuizSetupViewProps> = ({
             </div>
           </button>
         </form>
+
+        {/* Creator Option: Customize Questions in Full Editor */}
+        {!isParticipant && onCustomize && (
+          <div className="w-full mt-3 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                const trimmed = name.trim();
+                onCustomize(trimmed, isTwoWay);
+              }}
+              className="text-xs font-bold text-sky-600 hover:text-sky-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer mx-auto py-1.5 px-3 rounded-full bg-sky-50/80 hover:bg-sky-100 border border-sky-100"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-pink-500" />
+              <span>Customize Questions in Full Editor 🎨</span>
+            </button>
+          </div>
+        )}
 
         {/* Decorative stickers */}
         <div className="flex items-center justify-between w-full mt-4 pt-3 border-t border-slate-100 text-xs text-slate-400 font-medium">

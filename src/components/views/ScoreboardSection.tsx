@@ -193,7 +193,7 @@ export const ScoreboardSection: React.FC<ScoreboardSectionProps> = ({
 
             return (
               <div
-                key={entry.id || index}
+                key={entry.id ? `${entry.id}-${index}` : `entry-${index}`}
                 className="relative w-full bg-white/95 backdrop-blur-xs rounded-2xl p-3.5 px-4 shadow-[0_8px_20px_rgba(56,165,255,0.12)] border-2 border-white flex items-center justify-between transition-all hover:scale-[1.01]"
               >
                 {/* Corner Decorative Sticker */}

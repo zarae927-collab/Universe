@@ -134,7 +134,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
 
               return (
                 <div
-                  key={sub.id}
+                  key={sub.id ? `${sub.id}-${index}` : `sub-${index}`}
                   className={`p-3 rounded-2xl border flex items-center justify-between transition-all ${
                     isFirst
                       ? 'bg-amber-50/70 border-amber-200 shadow-xs'

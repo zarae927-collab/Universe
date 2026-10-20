@@ -1,0 +1,113 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny all undefined paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global security helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Validator for Quiz public metadata
+    function isValidQuiz(data, quizId) {
+      return data.keys().hasAll(['id', 'category', 'creatorName', 'totalQuestions', 'createdAt']) &&
+        data.keys().hasOnly(['id', 'category', 'creatorName', 'title', 'description', 'totalQuestions', 'createdAt', 'submissionsCount', 'isTwoWay', 'questionIds', 'customQuestions', 'status']) &&
+        data.id == quizId &&
+        data.id is string && isValidId(data.id) &&
+        data.category is string && data.category.size() > 0 && data.category.size() <= 64 &&
+        data.creatorName is string && data.creatorName.size() > 0 && data.creatorName.size() <= 100 &&
+        data.totalQuestions is number && data.totalQuestions >= 1 && data.totalQuestions <= 100 &&
+        data.createdAt is string && data.createdAt.size() <= 64 &&
+        (!('title' in data) || (data.title is string && data.title.size() <= 200)) &&
+        (!('description' in data) || (data.description is string && data.description.size() <= 500)) &&
+        (!('submissionsCount' in data) || (data.submissionsCount is number && data.submissionsCount >= 0)) &&
+        (!('isTwoWay' in data) || data.isTwoWay is bool) &&
+        (!('status' in data) || (data.status is string && (data.status == 'published' || data.status == 'draft')));
+    }
+
+    // Validator for Submission records
+    function isValidSubmission(data, quizId, subId) {
+      return data.keys().hasAll(['id', 'quizId', 'participantName', 'score', 'totalQuestions', 'percentage', 'submittedAt']) &&
+        data.keys().hasOnly(['id', 'quizId', 'participantName', 'score', 'totalQuestions', 'percentage', 'submittedAt', 'sharedInterestsCount', 'answers', 'avatarType', 'sticker']) &&
+        data.id == subId &&
+        isValidId(data.id) &&
+        data.quizId == quizId &&
+        data.participantName is string && data.participantName.size() > 0 && data.participantName.size() <= 100 &&
+        data.totalQuestions is number && data.totalQuestions >= 1 && data.totalQuestions <= 100 &&
+        data.score is number && data.score >= 0 && data.score <= data.totalQuestions &&
+        data.percentage is number && data.percentage >= 0 && data.percentage <= 100 &&
+        data.submittedAt is string && data.submittedAt.size() <= 64 &&
+        (!('sharedInterestsCount' in data) || (data.sharedInterestsCount is number && data.sharedInterestsCount >= 0));
+    }
+
+    // Quiz collection
+    match /quizzes/{quizId} {
+      // Anyone can get individual quiz public details to play it or view metadata
+      allow get: if isValidId(quizId);
+      
+      // Allow listing quizzes only if safe constraints exist (e.g., query limits)
+      allow list: if false;
+
+      // Creation: must validate schema, ID, and ensure parent does not exist
+      allow create: if isValidId(quizId) && isValidQuiz(incoming(), quizId);
+
+      // Quiz updates are strictly controlled to prevent state hijacking
+      // Allowed update: incrementing submissionsCount only
+      allow update: if isValidId(quizId) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['submissionsCount']) &&
+        incoming().submissionsCount is number &&
+        incoming().submissionsCount >= existing().submissionsCount;
+
+      // Deletion is disallowed via direct client
+      allow delete: if false;
+
+      // Submissions subcollection (Leaderboard & Results)
+      match /submissions/{submissionId} {
+        // Takers and creators can read leaderboard entries for this quiz
+        allow get: if isValidId(quizId) && isValidId(submissionId);
+        allow list: if isValidId(quizId);
+
+        // Participants can post a completed submission record
+        allow create: if isValidId(quizId) &&
+          isValidId(submissionId) &&
+          exists(/databases/$(database)/documents/quizzes/$(quizId)) &&
+          isValidSubmission(incoming(), quizId, submissionId);
+
+        // Submissions are immutable once recorded to prevent leaderboard falsification
+        allow update, delete: if false;
+      }
+
+      // Private Answer Key subcollection (Anti-Cheating Guard)
+      match /private/{docId} {
+        // Participants are NEVER allowed to read the answer key
+        allow read: if false;
+
+        // Key can only be written at initial quiz creation alongside the quiz
+        allow create: if isValidId(quizId) &&
+          docId == 'key' &&
+          incoming().keys().hasAll(['quizId', 'creatorAnswers']) &&
+          incoming().quizId == quizId &&
+          incoming().creatorAnswers is map;
+
+        // Keys cannot be updated or deleted by clients
+        allow update, delete: if false;
+      }
+    }
+  }
+}

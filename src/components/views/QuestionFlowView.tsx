@@ -14,6 +14,8 @@ interface QuestionFlowViewProps {
   isTwoWay?: boolean;
   onBack: () => void;
   onFinish: (answers: Record<string | number, any>) => void;
+  onSaveDraft?: (answers: Record<string | number, any>) => void;
+  onOpenEditor?: (answers: Record<string | number, any>) => void;
 }
 
 export const QuestionFlowView: React.FC<QuestionFlowViewProps> = ({
@@ -24,6 +26,8 @@ export const QuestionFlowView: React.FC<QuestionFlowViewProps> = ({
   isTwoWay = false,
   onBack,
   onFinish,
+  onSaveDraft,
+  onOpenEditor,
 }) => {
   const t = TRANSLATIONS[currentLang];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -225,6 +229,30 @@ export const QuestionFlowView: React.FC<QuestionFlowViewProps> = ({
             <ArrowRight className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
         </button>
+
+        {/* Options for Creator Mode */}
+        {isCreatorMode && (
+          <div className="w-full mt-3 flex flex-col items-center gap-1.5 text-center">
+            {onOpenEditor && (
+              <button
+                type="button"
+                onClick={() => onOpenEditor(selectedAnswers)}
+                className="text-xs font-bold text-sky-600 hover:text-sky-800 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <span>Customize Questions & Choices in Editor 🎨</span>
+              </button>
+            )}
+            {onSaveDraft && (
+              <button
+                type="button"
+                onClick={() => onSaveDraft(selectedAnswers)}
+                className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors cursor-pointer"
+              >
+                Save as Private Draft & Finish Later 💾
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

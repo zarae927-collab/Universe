@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "Quiz": {
+      "title": "Quiz",
+      "description": "Represents a shared friendship or relationship quiz with safe public metadata",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "category": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "creatorName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "totalQuestions": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "submissionsCount": {
+          "type": "number"
+        },
+        "isTwoWay": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["published", "draft"]
+        }
+      },
+      "required": [
+        "id",
+        "category",
+        "creatorName",
+        "totalQuestions",
+        "createdAt"
+      ]
+    },
+    "QuizAnswerKey": {
+      "title": "QuizAnswerKey",
+      "description": "Private answer key configured by the quiz creator to prevent pre-submission cheating",
+      "type": "object",
+      "properties": {
+        "quizId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "creatorAnswers": {
+          "type": "object"
+        },
+        "creatorSecret": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "editTokenHash": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "recoveryCodeHash": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "recoveryAttempts": {
+          "type": "number"
+        },
+        "lastRecoveryAttemptAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "quizId",
+        "creatorAnswers"
+      ]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Participant score record and leaderboard entry",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "quizId": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "participantName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "score": {
+          "type": "number"
+        },
+        "totalQuestions": {
+          "type": "number"
+        },
+        "percentage": {
+          "type": "number"
+        },
+        "submittedAt": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "sharedInterestsCount": {
+          "type": "number"
+        },
+        "avatarType": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "sticker": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "answers": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "quizId",
+        "participantName",
+        "score",
+        "totalQuestions",
+        "percentage",
+        "submittedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/quizzes/{quizId}": {
+      "schema": "Quiz",
+      "description": "Public quiz information available for participants taking the quiz"
+    },
+    "/quizzes/{quizId}/private/key": {
+      "schema": "QuizAnswerKey",
+      "description": "Restricted creator answers isolated from participant direct reads"
+    },
+    "/quizzes/{quizId}/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Submissions and leaderboard ranking for each quiz"
+    }
+  }
+}

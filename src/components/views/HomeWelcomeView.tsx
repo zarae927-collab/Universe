@@ -15,6 +15,7 @@ interface HomeWelcomeViewProps {
   onSelectCategory: (category: QuizCategory) => void;
   onStartQuiz: () => void;
   onOpenCodeInput: () => void;
+  onOpenCreatorModal?: () => void;
 }
 
 export const HomeWelcomeView: React.FC<HomeWelcomeViewProps> = ({
@@ -23,6 +24,7 @@ export const HomeWelcomeView: React.FC<HomeWelcomeViewProps> = ({
   onSelectCategory,
   onStartQuiz,
   onOpenCodeInput,
+  onOpenCreatorModal,
 }) => {
   const t = TRANSLATIONS[currentLang];
 
@@ -165,14 +167,23 @@ export const HomeWelcomeView: React.FC<HomeWelcomeViewProps> = ({
         </button>
       </div>
 
-      {/* Enter Code Option */}
-      <div className="mt-3 text-center">
+      {/* Enter Code Option & Creator Access */}
+      <div className="mt-3 text-center flex flex-col items-center gap-1">
         <button
           onClick={onOpenCodeInput}
           className="text-xs font-semibold text-slate-500 hover:text-sky-600 transition-colors underline decoration-dotted cursor-pointer"
         >
           Have a friend's quiz code? Enter it here 🔑
         </button>
+
+        {onOpenCreatorModal && (
+          <button
+            onClick={onOpenCreatorModal}
+            className="text-[11px] font-semibold text-sky-600 hover:text-sky-800 transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span>Created a quiz? Manage & Recover Access 🔐</span>
+          </button>
+        )}
       </div>
 
       {/* Explore All 8 Categories Collection */}

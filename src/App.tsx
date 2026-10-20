@@ -12,8 +12,18 @@ import { QuizResultView } from './components/views/QuizResultView';
 import { LeaderboardView } from './components/views/LeaderboardView';
 import { CodeInputModal } from './components/views/CodeInputModal';
 import { CustomQuizBuilderView } from './components/views/CustomQuizBuilderView';
+import { CreatorRecoveryModal } from './components/views/CreatorRecoveryModal';
 
-import { fetchQuiz, createQuiz, submitQuizAnswers } from './services/quizApi';
+import {
+  fetchQuiz,
+  createQuiz,
+  submitQuizAnswers,
+  getCreatorRecoveryCode,
+  fetchCreatorQuiz,
+  updateCreatorQuiz,
+  publishCreatorQuiz,
+  getCreatorToken,
+} from './services/quizApi';
 
 type AppStep =
   | 'home'
@@ -38,13 +48,19 @@ export default function App() {
   const [creatorName, setCreatorName] = useState('');
   const [participantName, setParticipantName] = useState('');
   const [activeQuizId, setActiveQuizId] = useState<string>('');
+  const [activeQuizTitle, setActiveQuizTitle] = useState<string>('');
+  const [activeQuizDescription, setActiveQuizDescription] = useState<string>('');
   const [activeQuizData, setActiveQuizData] = useState<StoredQuizData | null>(null);
   const [customQuestions, setCustomQuestions] = useState<QuizQuestion[] | null>(null);
+  const [activeCreatorAnswers, setActiveCreatorAnswers] = useState<Record<string | number, any> | null>(null);
   const [isTwoWayMode, setIsTwoWayMode] = useState(false);
   const [submissionResult, setSubmissionResult] = useState<SubmissionResponse | null>(null);
+  const [activeRecoveryCode, setActiveRecoveryCode] = useState<string>('');
+  const [isQuizDraft, setIsQuizDraft] = useState<boolean>(false);
 
-  // Modal
+  // Modals
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+  const [isCreatorRecoveryModalOpen, setIsCreatorRecoveryModalOpen] = useState(false);
 
   // Check URL params on initial load
   useEffect(() => {
@@ -72,7 +88,17 @@ export default function App() {
         setCustomQuestions(null);
       }
       setIsTwoWayMode(Boolean(data.isTwoWay));
-      setStep('participant-setup');
+
+      const savedRec = getCreatorRecoveryCode(id);
+      if (savedRec) setActiveRecoveryCode(savedRec);
+
+      if (data.status === 'draft') {
+        setIsQuizDraft(true);
+        setStep('created-success');
+      } else {
+        setIsQuizDraft(false);
+        setStep('participant-setup');
+      }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to load quiz');
       setStep('home');
@@ -105,16 +131,19 @@ export default function App() {
       const questionsToUse = customQuestions || getQuestionsByCategory(selectedCategory);
       const questionIds = questionsToUse.map((q) => q.id);
 
-      const { quizId } = await createQuiz({
+      const { quizId, recoveryCode } = await createQuiz({
         category: selectedCategory,
         creatorName,
         creatorAnswers: answers,
         questionIds,
         customQuestions: selectedCategory === 'custom' ? questionsToUse : undefined,
         isTwoWay: isTwoWayMode,
+        status: 'published',
       });
 
       setActiveQuizId(quizId);
+      if (recoveryCode) setActiveRecoveryCode(recoveryCode);
+      setIsQuizDraft(false);
 
       // Update URL query param without page reload so user can copy directly
       if (typeof window !== 'undefined' && window.history.pushState) {
@@ -130,32 +159,30 @@ export default function App() {
     }
   };
 
-  const handleCustomQuizPublish = async (quizData: {
-    title: string;
-    description: string;
-    creatorName: string;
-    questions: QuizQuestion[];
-    creatorAnswers: Record<string | number, any>;
-  }) => {
+  const handleCreatorSaveDraft = async (answers: Record<string | number, any>) => {
     try {
       setLoading(true);
-      setLoadingMessage('publishing custom quiz...');
+      setLoadingMessage('saving private draft...');
 
-      setSelectedCategory('custom');
-      setCreatorName(quizData.creatorName);
-      setCustomQuestions(quizData.questions);
+      const questionsToUse = customQuestions || getQuestionsByCategory(selectedCategory);
+      const questionIds = questionsToUse.map((q) => q.id);
 
-      const { quizId } = await createQuiz({
-        category: 'custom',
-        title: quizData.title,
-        description: quizData.description,
-        creatorName: quizData.creatorName,
-        creatorAnswers: quizData.creatorAnswers,
-        customQuestions: quizData.questions,
-        questionIds: quizData.questions.map((q) => q.id),
-      });
+      const { quizId, recoveryCode } = await createQuiz(
+        {
+          category: selectedCategory,
+          creatorName,
+          creatorAnswers: answers,
+          questionIds,
+          customQuestions: selectedCategory === 'custom' ? questionsToUse : undefined,
+          isTwoWay: isTwoWayMode,
+          status: 'draft',
+        },
+        true
+      );
 
       setActiveQuizId(quizId);
+      if (recoveryCode) setActiveRecoveryCode(recoveryCode);
+      setIsQuizDraft(true);
 
       if (typeof window !== 'undefined' && window.history.pushState) {
         const newUrl = `${window.location.pathname}?quiz=${quizId}`;
@@ -164,7 +191,198 @@ export default function App() {
 
       setStep('created-success');
     } catch (err: any) {
-      alert('Could not publish custom quiz. Please try again.');
+      alert('Could not save draft. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCustomQuizPublish = async (quizData: {
+    quizId?: string;
+    title: string;
+    description: string;
+    creatorName: string;
+    category?: QuizCategory;
+    questions: QuizQuestion[];
+    creatorAnswers: Record<string | number, any>;
+  }) => {
+    try {
+      setLoading(true);
+      setLoadingMessage('publishing your quiz...');
+
+      const targetCategory = quizData.category || selectedCategory || 'custom';
+      setSelectedCategory(targetCategory);
+      setCreatorName(quizData.creatorName);
+      setCustomQuestions(quizData.questions);
+      setActiveQuizTitle(quizData.title);
+      setActiveQuizDescription(quizData.description);
+      setActiveCreatorAnswers(quizData.creatorAnswers);
+
+      let quizId = quizData.quizId || activeQuizId;
+      let recoveryCode = activeRecoveryCode;
+
+      if (quizId && getCreatorToken(quizId)) {
+        await updateCreatorQuiz(quizId, {
+          title: quizData.title,
+          description: quizData.description,
+          creatorName: quizData.creatorName,
+          category: targetCategory,
+          creatorAnswers: quizData.creatorAnswers,
+          customQuestions: quizData.questions,
+          questionIds: quizData.questions.map((q) => q.id),
+        });
+        await publishCreatorQuiz(quizId);
+      } else {
+        const res = await createQuiz({
+          category: targetCategory,
+          title: quizData.title,
+          description: quizData.description,
+          creatorName: quizData.creatorName,
+          creatorAnswers: quizData.creatorAnswers,
+          customQuestions: quizData.questions,
+          questionIds: quizData.questions.map((q) => q.id),
+          status: 'published',
+        });
+        quizId = res.quizId;
+        if (res.recoveryCode) recoveryCode = res.recoveryCode;
+      }
+
+      setActiveQuizId(quizId);
+      if (recoveryCode) setActiveRecoveryCode(recoveryCode);
+      setIsQuizDraft(false);
+
+      if (typeof window !== 'undefined' && window.history.pushState) {
+        const newUrl = `${window.location.pathname}?quiz=${quizId}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+      }
+
+      setStep('created-success');
+    } catch (err: any) {
+      alert('Could not publish quiz: ' + (err.message || 'Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCustomQuizDraft = async (quizData: {
+    quizId?: string;
+    title: string;
+    description: string;
+    creatorName: string;
+    category?: QuizCategory;
+    questions: QuizQuestion[];
+    creatorAnswers: Record<string | number, any>;
+  }): Promise<{ quizId: string; recoveryCode?: string }> => {
+    try {
+      const targetCategory = quizData.category || selectedCategory || 'custom';
+      setSelectedCategory(targetCategory);
+      setCreatorName(quizData.creatorName);
+      setCustomQuestions(quizData.questions);
+      setActiveQuizTitle(quizData.title);
+      setActiveQuizDescription(quizData.description);
+      setActiveCreatorAnswers(quizData.creatorAnswers);
+
+      let quizId = quizData.quizId || activeQuizId;
+      let recoveryCode = activeRecoveryCode;
+
+      if (quizId && getCreatorToken(quizId)) {
+        await updateCreatorQuiz(quizId, {
+          title: quizData.title,
+          description: quizData.description,
+          creatorName: quizData.creatorName,
+          category: targetCategory,
+          creatorAnswers: quizData.creatorAnswers,
+          customQuestions: quizData.questions,
+          questionIds: quizData.questions.map((q) => q.id),
+        });
+      } else {
+        const res = await createQuiz(
+          {
+            category: targetCategory,
+            title: quizData.title,
+            description: quizData.description,
+            creatorName: quizData.creatorName,
+            creatorAnswers: quizData.creatorAnswers,
+            customQuestions: quizData.questions,
+            questionIds: quizData.questions.map((q) => q.id),
+            status: 'draft',
+          },
+          true
+        );
+        quizId = res.quizId;
+        if (res.recoveryCode) recoveryCode = res.recoveryCode;
+      }
+
+      setActiveQuizId(quizId);
+      if (recoveryCode) setActiveRecoveryCode(recoveryCode);
+      setIsQuizDraft(true);
+
+      if (typeof window !== 'undefined' && window.history.pushState) {
+        const newUrl = `${window.location.pathname}?quiz=${quizId}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+      }
+
+      return { quizId, recoveryCode };
+    } catch (err: any) {
+      throw new Error(err.message || 'Could not save draft');
+    }
+  };
+
+  const handleEditQuizDraft = async (id: string) => {
+    try {
+      setLoading(true);
+      setLoadingMessage('loading your quiz into editor...');
+      setErrorMessage('');
+
+      let creatorDetails: any = null;
+      try {
+        creatorDetails = await fetchCreatorQuiz(id);
+      } catch (e) {
+        const publicQuiz = await fetchQuiz(id);
+        creatorDetails = {
+          ...publicQuiz,
+          creatorAnswers: {},
+          canEdit: Boolean(publicQuiz.canEdit),
+          status: publicQuiz.status || 'draft',
+        };
+      }
+
+      setActiveQuizId(id);
+      setActiveQuizData(creatorDetails);
+      setSelectedCategory(creatorDetails.category);
+      setCreatorName(creatorDetails.creatorName);
+      setActiveQuizTitle(creatorDetails.title || '');
+      setActiveQuizDescription(creatorDetails.description || '');
+      setActiveCreatorAnswers(creatorDetails.creatorAnswers || {});
+
+      // Determine questions
+      let loadedQuestions: QuizQuestion[] = [];
+      if (Array.isArray(creatorDetails.customQuestions) && creatorDetails.customQuestions.length > 0) {
+        loadedQuestions = creatorDetails.customQuestions;
+      } else {
+        const catQuestions = getQuestionsByCategory(creatorDetails.category);
+        if (creatorDetails.questionIds && creatorDetails.questionIds.length > 0) {
+          loadedQuestions = creatorDetails.questionIds
+            .map((qid: number) => catQuestions.find((q) => q.id === qid))
+            .filter(Boolean) as QuizQuestion[];
+          if (loadedQuestions.length === 0) {
+            loadedQuestions = catQuestions.slice(0, 10);
+          }
+        } else {
+          loadedQuestions = catQuestions.slice(0, 10);
+        }
+      }
+
+      setCustomQuestions(loadedQuestions);
+      setIsTwoWayMode(Boolean(creatorDetails.isTwoWay));
+
+      const savedRec = getCreatorRecoveryCode(id);
+      if (savedRec) setActiveRecoveryCode(savedRec);
+
+      setIsQuizDraft(creatorDetails.status === 'draft');
+      setStep('custom-builder');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to load quiz for editing');
     } finally {
       setLoading(false);
     }
@@ -227,6 +445,7 @@ export default function App() {
         onOpenLeaderboard={
           activeQuizId ? () => setStep('leaderboard') : undefined
         }
+        onOpenCreatorModal={() => setIsCreatorRecoveryModalOpen(true)}
       />
 
       {/* Main Interactive Container */}
@@ -264,6 +483,7 @@ export default function App() {
                 }}
                 onStartQuiz={() => handleStartCreatorFlow()}
                 onOpenCodeInput={() => setIsCodeModalOpen(true)}
+                onOpenCreatorModal={() => setIsCreatorRecoveryModalOpen(true)}
               />
             )}
 
@@ -271,8 +491,17 @@ export default function App() {
             {step === 'custom-builder' && (
               <CustomQuizBuilderView
                 currentLang={currentLang}
+                initialQuizId={activeQuizId || undefined}
+                initialTitle={activeQuizTitle || activeQuizData?.title || undefined}
+                initialDescription={activeQuizDescription || activeQuizData?.description || undefined}
+                initialCreatorName={creatorName || undefined}
+                initialCategory={selectedCategory || 'custom'}
+                initialQuestions={customQuestions || undefined}
+                initialCreatorAnswers={activeCreatorAnswers || undefined}
+                initialRecoveryCode={activeRecoveryCode || undefined}
                 onBack={() => setStep('home')}
                 onPublishQuiz={handleCustomQuizPublish}
+                onSaveDraft={handleCustomQuizDraft}
               />
             )}
 
@@ -284,6 +513,13 @@ export default function App() {
                 initialName={creatorName}
                 onBack={() => setStep('home')}
                 onContinue={handleCreatorNameSubmit}
+                onCustomize={(name, isTwoWay) => {
+                  setCreatorName(name);
+                  setIsTwoWayMode(Boolean(isTwoWay));
+                  const initialQs = getQuestionsByCategory(selectedCategory).slice(0, 10);
+                  setCustomQuestions(initialQs);
+                  setStep('custom-builder');
+                }}
               />
             )}
 
@@ -296,6 +532,12 @@ export default function App() {
                 isTwoWay={isTwoWayMode}
                 onBack={() => setStep('creator-setup')}
                 onFinish={handleCreatorFinishQuestions}
+                onSaveDraft={handleCreatorSaveDraft}
+                onOpenEditor={(answers) => {
+                  setActiveCreatorAnswers(answers);
+                  setCustomQuestions(currentQuestions);
+                  setStep('custom-builder');
+                }}
               />
             )}
 
@@ -306,6 +548,9 @@ export default function App() {
                 quizId={activeQuizId}
                 creatorName={creatorName}
                 category={selectedCategory}
+                recoveryCode={activeRecoveryCode}
+                isDraft={isQuizDraft}
+                onEditDraft={() => handleEditQuizDraft(activeQuizId)}
                 onViewLeaderboard={() => setStep('leaderboard')}
                 onPlaySelf={() => {
                   setParticipantName(`${creatorName} (Self Test)`);
@@ -383,6 +628,20 @@ export default function App() {
         onSubmitCode={(code) => {
           setIsCodeModalOpen(false);
           loadQuizById(code);
+        }}
+      />
+
+      {/* Creator Access & Recovery Modal */}
+      <CreatorRecoveryModal
+        isOpen={isCreatorRecoveryModalOpen}
+        onClose={() => setIsCreatorRecoveryModalOpen(false)}
+        onSelectQuiz={(id) => {
+          setIsCreatorRecoveryModalOpen(false);
+          loadQuizById(id);
+        }}
+        onEditDraft={(id) => {
+          setIsCreatorRecoveryModalOpen(false);
+          handleEditQuizDraft(id);
         }}
       />
     </div>
